@@ -1,78 +1,231 @@
-# juridikbok-harvester
+# Juridikbok Harvester
 
-Systematiskt nedladdnings- och metadata-anrikningsverktyg för [juridikbok.se](https://www.juridikbok.se) – Sveriges öppna bibliotek för juridisk litteratur.
+Ett Python-verktyg för systematisk harvesting av juridisk litteratur från juridikbok.se, med automatisk metadata-anrikning via LIBRIS och citatformatering enligt svensk HD-standard.
+
+## ⚠️ VIKTIGT: Juridiska Villkor
+
+**Läs [LEGAL_NOTICE.md](LEGAL_NOTICE.md) innan användning.**
+
+Allt material från juridikbok.se är licensierat under **CC BY-NC 4.0** vilket innebär:
+- ✅ Icke-kommersiell forskning och utbildning
+- ❌ Kommersiell användning eller vidaredistribution
+- **Alltid** korrekt attribution till författare
+
+Detta verktyg är avsett för Access to Justice-forskning, INTE kommersiell exploatering.
 
 ## Syfte
 
-Projektet är en del av ett icke-kommersiellt **Access to Justice**-projekt som syftar till att göra svensk juridisk doktrin tillgänglig och sökbar för privatpersoner. Harvestern laddar ner PDF:er från juridikbok.se och anrikar metadata via LIBRIS för att möjliggöra citatmatchning mot rättspraxis.
+Detta verktyg skapades som del av ett Access to Justice-projekt för att:
+- Systematiskt dokumentera tillgänglig juridisk litteratur på svenska
+- Generera korrekt formaterade HD-standardcitat
+- Anrika metadata med ämnesord och klassifikationskoder från LIBRIS
+- Möjliggöra framtida AI-assisterad juridisk analys
 
 ## Funktioner
 
-- **Fas 1**: Crawlar juridikbok.se:s katalog (~900 verk), extraherar metadata och laddar ner PDF:er
-- **Fas 2**: Anrikar med LIBRIS-data (SAB-klassifikation, DDC, ämnesord, författarnamn)
-- **HD-citeringsformat**: Genererar automatiskt referensformat enligt Högsta domstolens praxis, t.ex. `Knut Rodhe, Obligationsrätt, 1956`
-- **Resume-funktion**: Redan nedladdade PDF:er hoppas över vid omstart
-- **Artigt crawlande**: Konfigurerbar fördröjning mellan requests (default 1.5s)
+- ✅ Crawlar juridikbok.se för tillgängliga juridiska verk
+- ✅ Laddar ner PDF-filer med respekt för CC BY-NC 4.0-licensiering
+- ✅ Extraherar metadata (författare, titel, år, upplaga, typ)
+- ✅ Genererar HD-standardcitat: "Förnamn Efternamn, Titel, X uppl. År"
+- ✅ Skapar kortcitat för referenshantering
+- ✅ LIBRIS-integration för ämnesord och SAB-klassifikation
+- ✅ Filnamnsformat: `ÅÅÅÅ - typ - författare - titel - upplaga.pdf`
 
-## Snabbstart
+## Installation
+
+### Förutsättningar
+- Python 3.8 eller senare
+- macOS, Linux eller Windows
+
+### Steg-för-steg installation (macOS)
+
+1. **Klona repositoryt**
+```bash
+git clone https://github.com/eliassondavid/juridikbok-harvester.git
+cd juridikbok-harvester
+```
+
+2. **Skapa virtuell miljö**
+```bash
+python3 -m venv venv
+source venv/bin/activate  # På Windows: venv\Scripts\activate
+```
+
+3. **Installera dependencies**
+```bash
+pip install -r requirements.txt
+```
+
+## Användning
+
+### Grundläggande harvesting
 
 ```bash
-# Installera beroenden
-pip install requests beautifulsoup4
-
-# Testkörning (5 böcker)
-python src/harvester.py --max-books 5 --output-dir ./test
-
-# Full körning (~900 böcker, 1-3 timmar)
-python src/harvester.py --output-dir ./bibliotek
+python harvester.py
 ```
 
-Se [docs/INSTRUKTION.md](docs/INSTRUKTION.md) för detaljerad installationsguide (macOS).
+Detta kommer att:
+1. Crawla juridikbok.se efter tillgängliga verk
+2. Ladda ner PDF-filer till `downloads/`
+3. Generera metadata i `metadata.json`
+4. Skapa filnamn enligt standardformat
 
-## Filnamnkonvention
+### Anpassningsalternativ
 
-Filnamn matchar svensk juridisk praxis och är optimerade för mänsklig igenkänning:
+Se konfiguration i `harvester.py` för:
+- Output-kataloger
+- Metadata-format
+- LIBRIS-integrationsinställningar
+- Rate limiting för crawling
+
+## Filnamnsformat
+
+Genererade filer följer formatet:
+```
+ÅÅÅÅ - typ - författare - titel - upplaga.pdf
+```
+
+Exempel:
+```
+2020 - bok - Christina Ramberg - Köplagen - 4 uppl.pdf
+2018 - avh - Anders Victorin - Sakrätt och Inskrivning - 1 uppl.pdf
+```
+
+## HD-citatformat
+
+Verktyget genererar citat enligt Högsta domstolens referensstil:
+
+**Standard:**
+```
+Christina Ramberg, Köplagen, 4 uppl. 2020
+```
+
+**Kortcitat:**
+```
+Ramberg (2020)
+```
+
+**Specialfall:**
+- Första upplagan: Inget upplagetal anges (följer HD:s praxis)
+- Avhandlingar: Ingen särskild markering (HD behandlar som vanliga böcker)
+- Flera författare: Samtliga namn inkluderas
+
+## LIBRIS-integration
+
+För varje verk söker verktyget automatiskt i LIBRIS-katalogen för att hämta:
+- SAB-klassifikationskoder
+- Ämnesord (kontrollerade termer)
+- ISBN
+- Alternativa titlar/alias
+
+## Licensiering och Användarvillkor
+
+### Juridikbok.se CC BY-NC 4.0 Licens
+
+**VIKTIGT:** Allt innehåll från juridikbok.se är licensierat under Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0).
+
+**✅ Tillåten användning:**
+- Ladda ner och lagra på egen dator för forsknings-/utbildningssyfte
+- Citera med korrekt källhänvisning till författare och verk
+- Använda i icke-kommersiellt undervisningsmaterial eller kompendier
+- Metadata-extrahering och systematisk katalogisering
+- Dela genom länkar till juridikbok.se (föredraget framför fildelning)
+- Kopiera till självkostnadspris
+
+**❌ INTE tillåten användning:**
+- Kommersiell återutgivning eller försäljning
+- Vidaredistribution av PDF-filer utan korrekt attribution
+- Användning i kommersiella AI-system utan särskilt tillstånd
+- Kommersiell försäljning av kompendier innehållande dessa texter
+- Användning utan att ange upphovsman/författare
+
+### Detta verktygs licensiering
+
+**Koden** i detta repo är licensierad under MIT License (se LICENSE-fil).
+
+**Nedladdat innehåll** från juridikbok.se förblir under CC BY-NC 4.0 och:
+- Får INTE inkluderas i detta Git-repository (se .gitignore)
+- Får INTE vidaredistribueras kommersiellt
+- Måste ALLTID åtföljas av korrekt författar-attribution
+- Är avsett för personligt forsknings-/utbildningsbruk
+
+### Ansvarsfullt bruk
+
+**Använd detta verktyg endast för:**
+- Icke-kommersiell juridisk forskning
+- Utbildningsändamål
+- Access to Justice-initiativ
+- Personlig kunskapsuppbyggnad
+
+**Undvik:**
+- Massiv harvesting som belastar juridikbok.se:s servrar
+- Kommersiell exploatering av nedladdat material
+- Vidaredistribution utan tillstånd
+- AI-träning för kommersiella system (kräver särskild överenskommelse)
+
+**Vid osäkerhet:** Kontakta Stiftelsen för juridisk litteratur på nätet (STJL) via juridikbok.se
+
+**Använd verktyget ansvarsfullt och respektera upphovsrätt.**
+
+## Projektstruktur
 
 ```
-ÅÅÅÅ - typ - författare - titel [- Xuppl].pdf
+juridikbok-harvester/
+├── harvester.py           # Huvudskript
+├── requirements.txt       # Python dependencies
+├── README.md             # Projektdokumentation
+├── LICENSE               # MIT License för koden
+├── LEGAL_NOTICE.md       # VIKTIGT: Juridiska villkor och användaransvar
+├── CONTRIBUTING.md       # Bidragsriktlinjer
+├── .gitignore           # Git-exkluderingar
+└── downloads/           # Nedladdade PDF-filer (skapas automatiskt, INTE i Git)
 ```
 
-| Exempel | Typ |
-|---------|-----|
-| `1956 - bok - Rodhe - Obligationsratt.pdf` | Monografi |
-| `1995 - bok - Tiberg, Lennhammer - Skuldebrev, vaexel och check - 7uppl.pdf` | Flerfalsbok |
-| `2023 - avh - Goethlin - Prioritet och avtal.pdf` | Avhandling |
+**⚠️ LÄS LEGAL_NOTICE.md INNAN ANVÄNDNING**
 
-## Metadata (catalog.json)
+## Teknisk dokumentation
 
-Varje verk får bl.a.:
+### Dependencies
+- `requests` - HTTP-förfrågningar
+- `beautifulsoup4` - HTML-parsing
+- `lxml` - XML-parser för LIBRIS
+- `urllib3` - URL-hantering
 
-| Fält | Exempel | Källa |
-|------|---------|-------|
-| `citation_hd` | `Knut Rodhe, Obligationsrätt, 1956` | Genererat (HD:s format) |
-| `short_cite` | `Rodhe, Obligationsrätt` | Genererat |
-| `classification.sab` | `Oeaa-c` | LIBRIS |
-| `subjects_libris` | `[{"term": "Obligationsrätt"}]` | LIBRIS |
-| `authors_parsed` | `[{"first": "Knut", "last": "Rodhe"}]` | juridikbok.se + LIBRIS |
+### Rate Limiting
+Verktyget inkluderar rate limiting för att:
+- Respektera juridikbok.se:s serverresurser
+- Undvika att blockeras av anti-scraping-mekanismer
+- Möjliggöra säker harvesting av ~900 verk
+
+## Framtida utveckling
+
+Planerade funktioner:
+- [ ] Google Drive-integration för automatisk uppladdning
+- [ ] Sidmappning för citatreferenser
+- [ ] Deduplikering mot befintlig samling
+- [ ] Progress tracking med resumption vid avbrott
+- [ ] Export till BibTeX/RIS-format
+- [ ] Integration med juridiskt AI-projekt
+
+## Bidrag
+
+Detta är ett forskningsprojekt inom Access to Justice. För frågor eller förslag:
+- Skapa ett issue på GitHub
+- Kontakta: David Eliasson (se GitHub-profil)
+
+## Erkännanden
+
+Projektet utvecklades som del av Access to Justice-initiativ för att förbättra tillgången till juridisk kunskap i Sverige.
+
+Tack till:
+- juridikbok.se för tillgängliggörande av juridisk litteratur under CC BY-NC 4.0
+- LIBRIS för öppen tillgång till biblioteksmetadata
+- Anthropic för utvecklingsstöd
 
 ## Licens
 
-Källkoden i detta repo är licensierad under **CC BY-NC 4.0** – samma licens som verken på juridikbok.se.
+[Välj lämplig licens - förslag: MIT License]
 
-Verken på juridikbok.se publiceras av **Stiftelsen för tillgängliggörande av juridisk litteratur** under [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/deed.sv). De nedladdade PDF:erna får **inte** användas i kommersiella tjänster utan separat överenskommelse med stiftelsen.
+---
 
-## Bakgrund
-
-Projektet grundar sig i en analys av hur Högsta domstolen (HD) refererar till juridisk doktrin. HD använder ett konsekvent format:
-
-> *Knut Rodhe, Obligationsrätt, 1956, s. 134*
-
-Harvestern genererar detta format automatiskt utifrån metadata, inklusive korrekt hantering av upplageangivelser (anges bara vid ≥2 uppl.) och flerfalsförfattare ("och"-konjunktion).
-
-Se [docs/HD-CITERINGSANALYS.md](docs/HD-CITERINGSANALYS.md) för den fullständiga analysen.
-
-## Relaterat
-
-- [juridikbok.se](https://www.juridikbok.se) – Stiftelsens öppna bibliotek
-- [LIBRIS](https://libris.kb.se) – Kungliga bibliotekets söktjänst
-- [lagen.nu](https://lagen.nu) – Öppen svensk rättsinformation
+**OBS:** Detta verktyg är för forsknings- och utbildningsändamål. Respektera alltid upphovsrätt och licensvillkor.
