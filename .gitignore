@@ -1,0 +1,25 @@
+# Nedladdade PDF:er (stora filer, ska inte committas)
+*.pdf
+bibliotek/
+test/
+
+# Katalogfil med metadata (genereras vid körning)
+catalog.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+*.egg-info/
+
+# macOS
+.DS_Store
+._*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

@@ -1,0 +1,82 @@
+{
+  "metadata": {
+    "source": "juridikbok.se",
+    "license": "CC BY-NC 4.0",
+    "harvested_at": "2025-02-18T14:00:00",
+    "note": "Exempelposter – visar katalogstrukturen. Genereras automatiskt av harvester.py"
+  },
+  "books": [
+    {
+      "title": "Obligationsrätt",
+      "year": "1956",
+      "book_type": "Monografi",
+      "authors": ["Knut Rodhe"],
+      "authors_parsed": [
+        {"first": "Knut", "last": "Rodhe", "full": "Knut Rodhe"}
+      ],
+      "isbn": null,
+      "edition": null,
+      "publisher_raw": "Norstedt (1956)",
+      "filename": "1956 - bok - Rodhe - Obligationsratt.pdf",
+      "citation_hd": "Knut Rodhe, Obligationsrätt, 1956",
+      "short_cite": "Rodhe, Obligationsrätt",
+      "aliases": ["Rodhe, Handbok", "Obl."],
+      "classification": {
+        "sab": "Oeaa-c",
+        "sab_description": "Förmögenhetsrätt, Allmän, Sverige",
+        "ddc": "346.48504"
+      },
+      "subjects_libris": [
+        {"term": "Obligationsrätt", "system": "SAO"},
+        {"term": "Sverige", "system": "SAO"}
+      ]
+    },
+    {
+      "title": "Skuldebrev, växel och check",
+      "year": "1995",
+      "book_type": "Monografi",
+      "authors": ["Hugo Tiberg", "Dan Lennhammer"],
+      "authors_parsed": [
+        {"first": "Hugo", "last": "Tiberg", "full": "Hugo Tiberg"},
+        {"first": "Dan", "last": "Lennhammer", "full": "Dan Lennhammer"}
+      ],
+      "isbn": "91-38-50330-3",
+      "edition": "7",
+      "publisher_raw": "Norstedt (1995)",
+      "filename": "1995 - bok - Tiberg, Lennhammer - Skuldebrev, vaexel och check - 7uppl.pdf",
+      "citation_hd": "Hugo Tiberg och Dan Lennhammer, Skuldebrev, växel och check, 7 uppl. 1995",
+      "short_cite": "Tiberg och Lennhammer, Skuldebrev, växel och check",
+      "aliases": [],
+      "classification": {
+        "sab": "Oeacc-c"
+      },
+      "subjects_libris": [
+        {"term": "Skuldebrev", "system": "SAO"},
+        {"term": "Checkrätt", "system": "SAO"}
+      ]
+    },
+    {
+      "title": "Prioritet och avtal",
+      "year": "2023",
+      "book_type": "Akademisk avhandling",
+      "authors": ["Sara Göthlin"],
+      "authors_parsed": [
+        {"first": "Sara", "last": "Göthlin", "full": "Sara Göthlin"}
+      ],
+      "isbn": "978-91-7963-124-7",
+      "edition": null,
+      "publisher_raw": "Jure (2023)",
+      "filename": "2023 - avh - Goethlin - Prioritet och avtal.pdf",
+      "citation_hd": "Sara Göthlin, Prioritet och avtal, 2023",
+      "short_cite": "Göthlin, Prioritet och avtal",
+      "aliases": [],
+      "classification": {
+        "sab": "Oead"
+      },
+      "subjects_libris": [
+        {"term": "Konkurser", "system": "SAO"},
+        {"term": "Lån juridik och lagstiftning", "system": "SAO"}
+      ]
+    }
+  ]
+}
