@@ -319,8 +319,7 @@ class JuridikbokHarvester:
             return None
         
         try:
-            # DENNA FUNKTION MÅSTE ANPASSAS TILL JURIDIKBOK.SE:s FAKTISKA HTML-STRUKTUR
-            # Nedan är en mallimplementation som behöver justeras
+            # Uppdaterad för juridikbok.se:s faktiska HTML-struktur
             
             metadata = {
                 'source_url': book_page_url,
@@ -330,41 +329,87 @@ class JuridikbokHarvester:
                 'author_last': '',
                 'year': 0,
                 'edition': 1,
-                'work_type': 'bok',
+                'work_type': 'Monografi',  # Default
                 'pdf_url': '',
                 'isbn': '',
+                'urn': '',
                 'description': '',
-                'publisher': ''
+                'publisher': '',
+                'series': '',
+                'subjects': []
             }
             
-            # Extrahera titel
-            title_elem = soup.find('h1')  # Anpassa selector
+            # Extrahera titel från h3
+            title_elem = soup.find('h3')
             if title_elem:
                 metadata['title'] = title_elem.get_text(strip=True)
             
-            # Extrahera författare
-            author_elem = soup.find('span', class_='author')  # Anpassa selector
-            if author_elem:
-                full_name = author_elem.get_text(strip=True)
+            # Extrahera författare från länk direkt efter titel
+            author_link = soup.find('a', href=re.compile(r'/books/by-author/'))
+            if author_link:
+                full_name = author_link.get_text(strip=True)
                 metadata['author'] = full_name
                 first, last = parse_author_name(full_name)
                 metadata['author_first'] = first
                 metadata['author_last'] = last
             
-            # Extrahera år och upplaga från metadata eller text
-            # Detta måste anpassas till faktisk struktur
-            year_match = re.search(r'(\d{4})', str(soup))
-            if year_match:
-                metadata['year'] = int(year_match.group(1))
+            # Extrahera metadata från definition list (dl/dt/dd)
+            dl_elem = soup.find('dl')
+            if dl_elem:
+                dts = dl_elem.find_all('dt')
+                dds = dl_elem.find_all('dd')
+                
+                for dt, dd in zip(dts, dds):
+                    label = dt.get_text(strip=True).lower()
+                    value = dd.get_text(strip=True)
+                    
+                    if 'isbn' in label:
+                        metadata['isbn'] = value
+                    elif 'urn' in label:
+                        metadata['urn'] = value
+                    elif 'upplaga' in label:
+                        try:
+                            metadata['edition'] = int(value)
+                        except ValueError:
+                            metadata['edition'] = 1
+                    elif 'förlag' in label:
+                        # Format: "Förlag (År)"
+                        publisher_match = re.match(r'(.+?)\s*\((\d{4})\)', value)
+                        if publisher_match:
+                            metadata['publisher'] = publisher_match.group(1).strip()
+                            metadata['year'] = int(publisher_match.group(2))
+                        else:
+                            metadata['publisher'] = value
+                    elif 'serie' in label:
+                        metadata['series'] = value
+                    elif 'typ av verk' in label:
+                        metadata['work_type'] = value
+                    elif 'ämnen' in label or 'ämne' in label:
+                        # Kan vara flera ämnen som länkar
+                        subject_links = dd.find_all('a')
+                        metadata['subjects'] = [link.get_text(strip=True) for link in subject_links]
             
-            edition_match = re.search(r'(\d+)\s*uppl', str(soup), re.IGNORECASE)
-            if edition_match:
-                metadata['edition'] = int(edition_match.group(1))
+            # Försök hitta PDF-länk (kan vara "Öppna som PDF" knapp eller liknande)
+            # OBS: Juridikbok.se kan ha dynamiska PDF-länkar som kräver JavaScript
+            pdf_patterns = [
+                r'/books/download/',
+                r'/pdf/',
+                r'\.pdf$'
+            ]
             
-            # Hitta PDF-länk
-            pdf_link = soup.find('a', href=re.compile(r'\.pdf$', re.I))
-            if pdf_link:
-                metadata['pdf_url'] = urljoin(book_page_url, pdf_link['href'])
+            for pattern in pdf_patterns:
+                pdf_link = soup.find('a', href=re.compile(pattern, re.I))
+                if pdf_link:
+                    metadata['pdf_url'] = urljoin(book_page_url, pdf_link['href'])
+                    break
+            
+            # Fallback: leta efter knapp med text "Öppna som PDF" eller liknande
+            if not metadata['pdf_url']:
+                pdf_buttons = soup.find_all('a', string=re.compile(r'öppna.*pdf', re.I))
+                for button in pdf_buttons:
+                    if button.get('href'):
+                        metadata['pdf_url'] = urljoin(book_page_url, button['href'])
+                        break
             
             return metadata
             
@@ -481,19 +526,19 @@ class JuridikbokHarvester:
             Lista med bok-URLer
             
         Note:
-            Denna funktion måste anpassas till juridikbok.se:s faktiska struktur.
+            Använder /Books/All endpoint för att få alla böcker.
         """
         logger.info("Hämtar lista över alla böcker...")
         
-        soup = self.fetch_page(f"{JURIDIKBOK_BASE_URL}/bocker")  # Anpassa URL
+        # Juridikbok.se har /Books/All som visar alla böcker
+        soup = self.fetch_page(f"{JURIDIKBOK_BASE_URL}/Books/All")
         if not soup:
             return []
         
         book_urls = []
         
-        # ANPASSA DETTA TILL FAKTISK HTML-STRUKTUR
-        # Exempel: hitta alla länkar till bokdetaljsidor
-        for link in soup.find_all('a', href=re.compile(r'/bok/')):  # Anpassa selector
+        # Hitta alla länkar till bokdetaljsidor (format: /book/[ISBN eller ID])
+        for link in soup.find_all('a', href=re.compile(r'/book/\d+')):
             book_url = urljoin(JURIDIKBOK_BASE_URL, link['href'])
             if book_url not in book_urls:
                 book_urls.append(book_url)
