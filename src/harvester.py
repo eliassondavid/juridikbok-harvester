@@ -237,12 +237,42 @@ def search_libris(title: str, author: str = None, year: int = None) -> Optional[
             records = data['xsearch']['list']
             if records:
                 record = records[0]
-                return {
-                    'isbn': record.get('identifier', {}).get('isbn', ''),
-                    'sab_code': record.get('classification', {}).get('sab', ''),
-                    'subjects': record.get('subject', []),
-                    'libris_id': record.get('identifier', {}).get('libris_id', '')
-                }
+                
+                # LIBRIS API returnerar fält som kan vara strängar eller dict
+                # Vi måste hantera båda fallen
+                result = {}
+                
+                # ISBN - kan vara string eller dict
+                identifier = record.get('identifier', '')
+                if isinstance(identifier, dict):
+                    result['isbn'] = identifier.get('isbn', '')
+                    result['libris_id'] = identifier.get('libris_id', '')
+                elif isinstance(identifier, str):
+                    result['isbn'] = identifier
+                    result['libris_id'] = ''
+                else:
+                    result['isbn'] = ''
+                    result['libris_id'] = ''
+                
+                # SAB-klassifikation
+                classification = record.get('classification', '')
+                if isinstance(classification, dict):
+                    result['sab_code'] = classification.get('sab', '')
+                elif isinstance(classification, str):
+                    result['sab_code'] = classification
+                else:
+                    result['sab_code'] = ''
+                
+                # Ämnesord - kan vara list eller string
+                subjects = record.get('subject', [])
+                if isinstance(subjects, list):
+                    result['subjects'] = subjects
+                elif isinstance(subjects, str):
+                    result['subjects'] = [subjects]
+                else:
+                    result['subjects'] = []
+                
+                return result
         
         logger.warning(f"Inget LIBRIS-resultat för: {title}")
         return None
@@ -250,7 +280,7 @@ def search_libris(title: str, author: str = None, year: int = None) -> Optional[
     except requests.RequestException as e:
         logger.error(f"LIBRIS API-fel: {e}")
         return None
-    except (json.JSONDecodeError, KeyError) as e:
+    except (json.JSONDecodeError, KeyError, AttributeError) as e:
         logger.error(f"LIBRIS parsning-fel: {e}")
         return None
 
